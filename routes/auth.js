@@ -83,6 +83,7 @@ router.post('/login', [
 });
 
 module.exports = router;
+router.get('/check-login', userController.checkLogin);
 router.get('/profile', auth, userController.getUserProfile);
 router.put('/profile', auth, userController.updateUserProfile);
 router.get('/', auth, verifyAdmin, userController.getAllUsers);

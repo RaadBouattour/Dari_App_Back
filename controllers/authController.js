@@ -145,3 +145,17 @@ exports.logout = (req, res) => {
     res.status(500).json({ message: 'Erreur lors de la déconnexion', error: error.message });
   }
 };
+
+exports.checkLogin = (req, res) => {
+  try {
+    const token = req.headers['authorization']?.replace('Bearer ', '').trim();
+    if (!token) {
+      return res.status(401).json({ isLoggedIn: false, message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.status(200).json({ isLoggedIn: true, userId: decoded.userId, role: decoded.role });
+  } catch (error) {
+    res.status(401).json({ isLoggedIn: false, message: 'Invalid or expired token' });
+  }
+};
