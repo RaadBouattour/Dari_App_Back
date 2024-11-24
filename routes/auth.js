@@ -6,8 +6,13 @@ const { check, validationResult } = require('express-validator');
 const User = require('../models/User');
 const auth = require('../middleware/auth');  
 const userController = require('../controllers/authController');
+const authController = require('../controllers/authController');
+
 const router = express.Router();
 const { verifyAdmin }  = require('../middleware/auth');
+
+router.put('/:id/updateUser', auth, verifyAdmin, authController.updateUser);
+
 // Register route
 router.post('/register', [
   check('email', 'Please include a valid email').isEmail(),
@@ -46,6 +51,20 @@ router.post('/register', [
     res.status(500).json({ msg: 'Server error while registering' });
   }
 });
+
+router.get('/getall', auth, verifyAdmin, async (req, res) => {
+  try {
+    const users = await User.find();
+    if (!users) {
+      return res.status(404).json({ message: 'No users found' });
+    }
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users', error: error.message });
+  }
+});
+
+
 
 // Login route
 router.post('/login', [
