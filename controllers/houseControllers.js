@@ -133,23 +133,25 @@ exports.updateHouse = async (req, res) => {
   
 // Supprimer une maison
 exports.deleteHouse = async (req, res) => {
-    try {
-      // Trouver la maison par ID
-      const house = await House.findById(req.params.id);
-      if (!house) return res.status(404).json({ message: 'Maison non trouvée' });
-  
-      // Vérifier si l'utilisateur authentifié est le créateur de la maison
-      if (house.userId.toString() !== req.user.userId) {
-        return res.status(403).json({ message: 'Vous n\'êtes pas autorisé à supprimer cette maison' });
-      }
-  
-      // Supprimer la maison
+  try {
+    // Find the house by ID
+    const house = await House.findById(req.params.id);
+    if (!house) return res.status(404).json({ message: 'Maison non trouvée' });
+
+    // Allow admins to delete any house
+    if (req.user.role === 'admin' || house.userId.toString() === req.user.userId) {
+      // Delete the house
       await House.findByIdAndDelete(req.params.id);
-      res.status(200).json({ message: 'Maison supprimée avec succès' });
-    } catch (error) {
-      res.status(500).json({ message: 'Erreur lors de la suppression de la maison', error });
+      return res.status(200).json({ message: 'Maison supprimée avec succès' });
+    } else {
+      return res.status(403).json({ message: 'Vous n\'êtes pas autorisé à supprimer cette maison' });
     }
-  };
+  } catch (error) {
+    console.error('Error deleting house:', error.message);
+    res.status(500).json({ message: 'Erreur lors de la suppression de la maison', error: error.message });
+  }
+};
+
 const nlp = require('compromise');  
 
 function extractSearchCriteria(query) {
